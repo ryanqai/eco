@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO 251 — Macroeconomics Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0E1117; --bg2: #161B27; --bg3: #1E2536;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --text: #F0F2F8; --text2: #8B92A8; --text3: #5A6178;
+    --accent: #4ADE80; --accent-dim: rgba(74,222,128,0.12); --accent-border: rgba(74,222,128,0.35);
+    --red: #F87171; --red-dim: rgba(248,113,113,0.12); --red-border: rgba(248,113,113,0.35);
+    --blue: #60A5FA;
+  }
+  html { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6; }
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(14,17,23,0.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center; gap: 1.5rem; height: 56px;
+  }
+  .nav-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .nav-badge { font-size: 11px; padding: 2px 10px; border-radius: 20px; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); font-weight: 500; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .nav-score { font-size: 13px; color: var(--text2); }
+  .nav-score span { color: var(--accent); font-weight: 600; }
+  .nav-restart { background: none; border: 1px solid var(--border2); color: var(--text2); font-size: 12px; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .nav-restart:hover { color: var(--text); border-color: var(--text3); }
+
+  .progress-wrap { height: 3px; background: var(--bg3); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #4ADE80, #34D399); transition: width 0.4s cubic-bezier(.4,0,.2,1); width: 0%; }
+
+  main { flex: 1; max-width: 680px; margin: 0 auto; width: 100%; padding: 2.5rem 1.5rem 5rem; }
+
+  .stats-bar { display: flex; gap: 10px; margin-bottom: 2rem; }
+  .stat { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+  .stat-val.green { color: var(--accent); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.blue { color: var(--blue); }
+  .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .q-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1rem; }
+  .q-eyebrow { font-size: 12px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .q-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .q-text { font-size: 17px; color: var(--text); line-height: 1.65; font-weight: 500; }
+
+  .options { display: flex; flex-direction: column; gap: 9px; margin-bottom: 1rem; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 13px 16px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg2); cursor: pointer; transition: all 0.15s;
+    text-align: left; width: 100%; font-family: 'Inter', sans-serif; color: var(--text);
+  }
+  .opt:hover:not(:disabled) { border-color: var(--border2); background: var(--bg3); }
+  .opt:disabled { cursor: default; }
+  .opt-label {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--text2); flex-shrink: 0;
+    background: var(--bg3); transition: all 0.15s;
+  }
+  .opt-text { font-size: 14px; line-height: 1.55; padding-top: 4px; color: var(--text); }
+  .opt.correct { border-color: var(--accent-border); background: var(--accent-dim); }
+  .opt.correct .opt-label { background: var(--accent); border-color: var(--accent); color: #0a1a0e; }
+  .opt.wrong { border-color: var(--red-border); background: var(--red-dim); }
+  .opt.wrong .opt-label { background: var(--red); border-color: var(--red); color: #1a0505; }
+
+  .feedback { border-radius: 12px; padding: 14px 18px; font-size: 14px; line-height: 1.6; margin-bottom: 1rem; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--accent-dim); border: 1px solid var(--accent-border); color: #86efac; }
+  .feedback.wrong { background: var(--red-dim); border: 1px solid var(--red-border); color: #fca5a5; }
+  .feedback strong { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+  .btn:hover { background: var(--bg2); border-color: var(--text3); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #0a1a0e; font-weight: 600; }
+  .btn-primary:hover { background: #34D399; border-color: #34D399; }
+
+  .result { text-align: center; padding: 4rem 2rem; display: none; }
+  .result.show { display: block; }
+  .result-ring { width: 140px; height: 140px; margin: 0 auto 2rem; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .result-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .result-score { font-family: 'Space Grotesk', sans-serif; font-size: 38px; font-weight: 700; color: var(--text); position: relative; z-index: 1; }
+  .result-of { font-size: 13px; color: var(--text2); position: relative; z-index: 1; }
+  .result-title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .result-msg { color: var(--text2); font-size: 15px; margin-bottom: 2.5rem; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .result-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  @media (max-width: 500px) {
+    main { padding: 1.5rem 1rem 4rem; }
+    .q-card { padding: 1.25rem; }
+    .q-text { font-size: 15px; }
+    nav { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">ECO 251</div>
+  <div class="nav-badge">Macroeconomics</div>
+  <div class="nav-right">
+    <div class="nav-score" id="nav-score">Điểm: <span>0</span> / 30</div>
+    <button class="nav-restart" onclick="restart()">🔀 Random lại</button>
+  </div>
+</nav>
+<div class="progress-wrap"><div class="progress-fill" id="progress"></div></div>
+
+<main>
+  <div class="stats-bar" id="stats-area">
+    <div class="stat"><div class="stat-val green" id="st-correct">0</div><div class="stat-label">Đúng</div></div>
+    <div class="stat"><div class="stat-val red" id="st-wrong">0</div><div class="stat-label">Sai</div></div>
+    <div class="stat"><div class="stat-val blue" id="st-remain">30</div><div class="stat-label">Còn lại</div></div>
+  </div>
+
+  <div id="quiz-area">
+    <div class="q-card">
+      <div class="q-eyebrow"><span class="q-dot"></span><span id="q-num">Câu 1 / 30</span></div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="btn-row" id="btn-row"></div>
+  </div>
+
+  <div class="result" id="result-area">
+    <div class="result-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="62" fill="none" stroke="#1E2536" stroke-width="8"/>
+        <circle cx="70" cy="70" r="62" fill="none" stroke="#4ADE80" stroke-width="8"
+          stroke-dasharray="389.6" stroke-dashoffset="389.6" id="ring-circle" stroke-linecap="round"/>
+      </svg>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-of" id="result-of">/ 30</div>
+    </div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="result-btns">
+      <button class="btn btn-primary" onclick="restart()">🔀 Làm lại (random)</button>
+      <button class="btn" onclick="reviewWrong()">📝 Ôn câu sai</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const ALL = [
+  {q:"The relationship between the interest rate and the level of income that equilibrates the money market is called the:",opts:["Aggregate supply curve","LM curve","IS curve","Aggregate demand curve"],ans:1,exp:"LM curve thể hiện tập hợp (r, Y) mà tại đó thị trường tiền tệ cân bằng (Liquidity = Money)."},
+  {q:"According to Keynes, consumption is primarily determined by:",opts:["The savings rate","Income and the interest rate","The interest rate","Disposable income"],ans:3,exp:"Keynes: C = C₀ + mpc × Yd. Tiêu dùng phụ thuộc chủ yếu vào thu nhập khả dụng (disposable income)."},
+  {q:"If the government wants to reduce unemployment, government purchases should be ___ and/or taxes should be ___:",opts:["Decreased; decreased","Increased; increased","Increased; decreased","Decreased; increased"],ans:2,exp:"Giảm thất nghiệp → kích thích kinh tế: tăng G (cầu tổng hợp tăng) và giảm T (Yd tăng, tiêu dùng tăng)."},
+  {q:"A decrease in government purchase will:",opts:["Shift the aggregate expenditure line downward","Make the aggregate expenditure function flatter","Shift the aggregate expenditure line upward","Make the aggregate expenditure function steeper"],ans:0,exp:"G là thành phần của AE = C+I+G+NX. Giảm G → đường AE dịch xuống (parallel shift down), không thay đổi độ dốc."},
+  {q:"The unemployment caused by the time that it takes to match workers and jobs is called:",opts:["Wage rigidity","Frictional unemployment","The discouraged-worker effect","Structural unemployment"],ans:1,exp:"Frictional unemployment = thất nghiệp ma sát: xảy ra do thời gian cần thiết để tìm kiếm và ghép đôi người lao động với việc làm."},
+  {q:"Which part of aggregate expenditure (AE) is monetary policy primarily intended to target?",opts:["Consumption","Net Exports","Government spending","Investment"],ans:3,exp:"Chính sách tiền tệ tác động qua lãi suất → Investment nhạy cảm nhất với lãi suất (doanh nghiệp vay vốn đầu tư)."},
+  {q:"In the Keynesian cross model, if the interest rate is constant and the MPC is 0.7, then the government purchases multiplier is:",opts:["3.3","0.7","0.3","1.4"],ans:0,exp:"Multiplier = 1/(1−MPC) = 1/(1−0.7) = 1/0.3 ≈ 3.3"},
+  {q:"An example of an automatic stabilizer is:",opts:["The interest the government pays on loans","The indexation of social security benefits to the consumer price index","Unemployment benefit system","Changing the tax laws to increase the marginal tax rates"],ans:2,exp:"Hệ thống trợ cấp thất nghiệp tự động tăng khi suy thoái mà không cần luật mới — automatic stabilizer điển hình."},
+  {q:"The difference between what a government spends and what it collects in taxes in a year is:",opts:["The government budget deficit or surplus","Net taxes","The government debt","Net revenue"],ans:0,exp:"Budget deficit/surplus = G − T (trong năm). Nợ chính phủ (debt) là tổng tích lũy của các khoản thâm hụt qua các năm."},
+  {q:"The IS curve is drawn for a given:",opts:["Level of income","Monetary policy","Interest rate","Fiscal policy"],ans:3,exp:"IS curve được vẽ khi giữ nguyên chính sách tài khóa (G, T cố định), thể hiện tổ hợp (r, Y) cân bằng thị trường hàng hóa."},
+  {q:"A general increase in the price level is called:",opts:["Hyperinflation","Inflation","Deflation","Devaluation"],ans:1,exp:"Inflation = mức giá chung tăng liên tục. Hyperinflation là lạm phát cực kỳ cao và nhanh (ví dụ Zimbabwe)."},
+  {q:"When the manager of a department store attaches price tags to his/her products, he/she is using money as a:",opts:["Medium of exchange","Unit of transfer","Unit of account","Store of value"],ans:2,exp:"Unit of account = tiền dùng để đo lường và biểu thị giá trị. Gắn nhãn giá = biểu thị giá trị bằng tiền."},
+  {q:"Currency held outside banks + demand deposits + travelers checks + other checkable deposits =",opts:["M3","M3 − M1","M2 − M1","M1"],ans:3,exp:"M1 = tiền mặt lưu thông + tiền gửi không kỳ hạn + séc du lịch + các khoản tiền gửi có thể rút séc khác."},
+  {q:"If output is greater than planned aggregate expenditure, there will be:",opts:["An unplanned decrease in inventories","A planned increase in inventories","No change in inventories","An unplanned increase in inventories"],ans:3,exp:"Output > AE → hàng sản xuất nhiều hơn hàng bán → tồn kho tăng ngoài kế hoạch (unplanned inventory buildup)."},
+  {q:"A decrease in lump-sum taxes will:",opts:["Shift the aggregate expenditure line upward","Make the consumption function flatter","Shift the aggregate expenditure line downward","Make the consumption function steeper"],ans:0,exp:"Giảm thuế khoán → Yd tăng → tiêu dùng tăng → đường AE dịch LÊN (parallel shift, không thay đổi độ dốc MPC)."},
+  {q:"The Central Bank uses open market operations to:",opts:["Determine the federal funds rate","Determine the required reserve ratio","Determine the discount rate","Buy or sell government securities"],ans:3,exp:"Open market operations = NHTW mua hoặc bán trái phiếu chính phủ để điều chỉnh lượng tiền cơ sở (monetary base)."},
+  {q:"During a recession, unemployment ___, tax revenue ___, and the budget deficit ___:",opts:["Falls; rises; rises","Falls; falls; rises","Rises; rises; falls","Rises; falls; rises"],ans:3,exp:"Suy thoái → thất nghiệp tăng (chi trợ cấp tăng) → thu thuế giảm (thu nhập thấp) → thâm hụt ngân sách tăng."},
+  {q:"The government purchases multiplier is:",opts:["The ratio of the change in the equilibrium level of output to a change in government purchases","The difference between the new and old levels of government purchases","The ratio of the change in government purchases to the change in the equilibrium level of output","The difference between the old equilibrium level of output and the new equilibrium level of output"],ans:0,exp:"Multiplier = ΔY/ΔG — đo lường Y cân bằng thay đổi bao nhiêu khi G thay đổi 1 đơn vị."},
+  {q:"If the short run aggregate supply curve increases, the price level will ___ and the amount of output will ___ in the short run:",opts:["Remain unchanged; increase","Decrease; increase","Increase; increase","Decrease; remain unchanged"],ans:1,exp:"SRAS tăng (dịch phải) → với cùng AD, mức giá giảm và sản lượng tăng."},
+  {q:"A decrease in the discount rate will most likely:",opts:["Not effect the money supply","Have an unclear affect on the money supply","Increase the money supply","Decrease the money supply"],ans:2,exp:"Giảm discount rate → ngân hàng vay từ NHTW rẻ hơn → cho vay nhiều hơn → cung tiền tăng."},
+  {q:"If the central bank increased the real amount of money supply, then the LM curve would:",opts:["Shift downward","Shift upward","Become flatter","Become steeper"],ans:0,exp:"Cung tiền tăng → lãi suất thấp hơn tại mỗi mức thu nhập → đường LM dịch XUỐNG (sang phải)."},
+  {q:"According to the crowding out effect:",opts:["Balanced budget government spending decreases the interest rate, making investment more attractive","Deficit government spending increases the interest rate, making investment less attractive","Balanced budget government spending increases the interest rate, making investment less attractive","Deficit government spending decreases the interest rate, making investment more attractive"],ans:1,exp:"Crowding out: thâm hụt ngân sách → chính phủ vay nhiều → lãi suất tăng → đầu tư tư nhân kém hấp dẫn."},
+  {q:"Which of the following is NOT a social cost of inflation?",opts:["The money that people hold loses value due to the inflation tax","Firms have to spend money to change prices more frequently","People hold smaller real balances and so have to make more frequent trips to the bank","Inflation leads to greater variability in the relative prices charged by firms"],ans:0,exp:"Inflation tax là hiệu ứng phân phối lại, KHÔNG phải chi phí xã hội lãng phí nguồn lực. Menu cost (B), shoe-leather cost (C), biến động giá tương đối (D) mới là social cost thực sự."},
+  {q:"If interest rates increase to a very high level, people will most likely hold:",opts:["Less money in savings accounts and more cash","Less money in savings accounts and less cash","More money in savings accounts and less cash","More money in savings accounts and more cash"],ans:2,exp:"Lãi suất cao → chi phí cơ hội của việc giữ tiền mặt tăng → người ta gửi tiết kiệm nhiều hơn, giữ tiền mặt ít hơn."},
+  {q:"Which of the following is an example of fiat money?",opts:["A government bond","A one hundred thousand dong bill","Cigarettes","An ounce of gold"],ans:1,exp:"Fiat money có giá trị theo sắc lệnh chính phủ, không có giá trị nội tại. Tờ 100.000 đồng là fiat money. Vàng/thuốc lá là commodity money; trái phiếu là công cụ nợ."},
+  {q:"The unemployment resulting from wage rigidity and job rationing is called:",opts:["The discouraged-worker effect","The natural rate of unemployment","Structural unemployment","Insiders versus outsiders"],ans:2,exp:"Structural unemployment = thất nghiệp cơ cấu: lương cứng nhắc trên mức cân bằng → cầu lao động < cung lao động → job rationing."},
+  {q:"A loan made by a bank is considered ___ of that bank:",opts:["Capital","An asset","A liability","Net worth"],ans:1,exp:"Từ góc độ ngân hàng: khoản cho vay là TÀI SẢN (người khác nợ ngân hàng). Tiền gửi của khách hàng là nợ phải trả (liability)."},
+  {q:"GDP measures:",opts:["Total value added by all firms in the economy","Total income of everyone in the economy","Expenditure on all final goods and services","All of the answers are correct"],ans:3,exp:"GDP đo được theo 3 cách cho cùng kết quả: (1) giá trị gia tăng, (2) thu nhập, (3) chi tiêu. Tất cả đều đúng."},
+  {q:"All else equal, if there is an increase in the nominal wage rate, the price level will ___ and the amount of aggregate output will ___ in the short run:",opts:["Increase; remain unchanged","Remain unchanged; increase","Increase; increase","Increase; decrease"],ans:3,exp:"Tiền lương danh nghĩa tăng → chi phí sản xuất tăng → SRAS dịch trái → mức giá tăng, sản lượng giảm."},
+  {q:"Fiscal policy refers to:",opts:["The techniques used by a business firm to reduce its tax liability","The government's ability to regulate a firm's behavior in the financial markets","The spending and taxing policies used by the government to influence the economy","The behavior of the nation's central bank, the Federal Reserve, regarding the nation's money supply"],ans:2,exp:"Fiscal policy = chính sách tài khóa: các quyết định của chính phủ về chi tiêu (G) và thuế (T). Chính sách tiền tệ là của NHTW."}
+];
+
+let order = [], cur = 0, correct = 0, wrong = 0, answered = false, userAns = {}, reviewSet = null;
+
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+function restart(set) {
+  reviewSet = set||null;
+  const base = reviewSet || ALL.map((_,i)=>i);
+  order = shuffle(base);
+  cur=0; correct=0; wrong=0; answered=false; userAns={};
+  document.getElementById('result-area').classList.remove('show');
+  document.getElementById('quiz-area').style.display='';
+  document.getElementById('stats-area').style.display='flex';
+  update(); render();
+}
+
+function reviewWrong() {
+  const ws = order.filter(i => userAns[i]!==undefined && userAns[i]!==ALL[i].ans);
+  if(!ws.length){alert('Không có câu nào sai! Bạn làm tốt lắm 🎉');return;}
+  restart(ws);
+}
+
+function update() {
+  const total = order.length;
+  document.getElementById('st-correct').textContent = correct;
+  document.getElementById('st-wrong').textContent = wrong;
+  document.getElementById('st-remain').textContent = total - cur;
+  document.getElementById('nav-score').innerHTML = 'Điểm: <span>'+correct+'</span> / '+total;
+  document.getElementById('progress').style.width = (cur/total*100)+'%';
+}
+
+function render() {
+  if(cur>=order.length){showResult();return;}
+  const idx=order[cur], q=ALL[idx], labels=['A','B','C','D'], total=order.length;
+  document.getElementById('q-num').textContent='Câu '+(cur+1)+' / '+total;
+  document.getElementById('q-text').textContent=q.q;
+
+  const optDiv=document.getElementById('options');
+  optDiv.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    if(answered){
+      if(i===q.ans) btn.classList.add('correct');
+      else if(i===userAns[idx]) btn.classList.add('wrong');
+    }
+    btn.disabled=answered;
+    btn.innerHTML=`<span class="opt-label">${labels[i]}</span><span class="opt-text">${o}</span>`;
+    btn.onclick=()=>answer(idx,i);
+    optDiv.appendChild(btn);
+  });
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback';
+  fb.innerHTML='';
+  if(answered){
+    const ok=userAns[idx]===q.ans;
+    fb.classList.add('show', ok?'correct':'wrong');
+    fb.innerHTML=`<strong>${ok?'✓ Đúng rồi!':'✗ Sai! Đáp án đúng là '+labels[q.ans]+'.'}</strong>${q.exp}`;
+  }
+
+  const br=document.getElementById('btn-row');
+  br.innerHTML='';
+  if(answered){
+    const b1=document.createElement('button');
+    b1.className='btn btn-primary';
+    b1.textContent=cur<order.length-1?'Câu tiếp →':'Xem kết quả →';
+    b1.onclick=next;
+    br.appendChild(b1);
+    const b2=document.createElement('button');
+    b2.className='btn';
+    b2.textContent='Làm lại từ đầu';
+    b2.onclick=()=>restart();
+    br.appendChild(b2);
+  }
+}
+
+function answer(idx,i){
+  if(answered)return;
+  answered=true; userAns[idx]=i;
+  if(i===ALL[idx].ans)correct++; else wrong++;
+  update(); render();
+}
+
+function next(){cur++;answered=false;update();render();}
+
+function showResult(){
+  document.getElementById('quiz-area').style.display='none';
+  const area=document.getElementById('result-area');
+  area.classList.add('show');
+  const total=order.length, pct=Math.round(correct/total*100);
+  document.getElementById('result-score').textContent=correct;
+  document.getElementById('result-of').textContent='/ '+total;
+  document.getElementById('ring-circle').style.strokeDashoffset=389.6-(389.6*pct/100);
+  document.getElementById('progress').style.width='100%';
+  let title,msg;
+  if(pct>=90){title='Xuất sắc! 🎯';msg='Bạn đã sẵn sàng thi ECO 251 rồi. Chúc thi tốt Thanh!';}
+  else if(pct>=70){title='Tốt lắm! 💪';msg='Ôn thêm vài câu nữa là chắc luôn rồi.';}
+  else if(pct>=50){title='Cố lên nào!';msg='Bấm "Ôn câu sai" để tập trung vào điểm yếu nhé.';}
+  else{title='Ôn lại lý thuyết nhé 📚';msg='Đừng nản — xem lại giải thích từng câu và thử lại!';}
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-msg').textContent=pct+'% chính xác ('+correct+'/'+total+' câu đúng). '+msg;
+}
+
+restart();
+</script>
+</body>
+</html>
